@@ -1,17 +1,50 @@
 import React from 'react'
-
+import allPets from '../data/pets.js'
 import Filters from './Filters'
 import PetBrowser from './PetBrowser'
 
 class App extends React.Component {
-  constructor() {
-    super()
-
-    this.state = {
-      pets: [],
+  state = {
+      pets: allPets,
       filters: {
         type: 'all'
       }
+    }
+
+
+  onAdoptPet = (newPet) =>{
+
+
+  const newArr = this.state.pets.map(pet=>{
+    if(pet.id === newPet.id){
+      return {...newPet,isAdopted:true}
+    }else{return pet}
+  })
+  this.setState({pets:newArr})
+  }
+
+  onChangeType = (newType) =>{
+    this.setState({
+      filters:{type:newType}
+    })
+  }
+
+  onFindPetsClick = () =>{
+    switch (this.state.filters.type){
+    case 'all':
+    fetch('/api/pets').then(resp=>resp.json()).then(newresp=>this.setState({pets:newresp}))
+      break;
+    case 'dog':
+    fetch('/api/pets?type=cat').then(resp=>resp.json()).then(newresp=>this.setState({pets: newresp}))
+      break;
+    case 'cat':
+    fetch('/api/pets?type=dog').then(resp=>resp.json()).then(newresp=>this.setState({pets: newresp}))
+      break;
+    case 'micropig':
+    fetch('/api/pets?type=micropig').then(resp=>resp.json()).then(newresp=>this.setState({pets: newresp}))
+      break;
+      default:
+      break;
     }
   }
 
@@ -24,10 +57,10 @@ class App extends React.Component {
         <div className="ui container">
           <div className="ui grid">
             <div className="four wide column">
-              <Filters />
+              <Filters onChangeType={this.onChangeType} onFindPetsClick={this.onFindPetsClick}/>
             </div>
             <div className="twelve wide column">
-              <PetBrowser />
+              <PetBrowser  onAdoptPet={this.onAdoptPet}pets={this.state.pets} />
             </div>
           </div>
         </div>
